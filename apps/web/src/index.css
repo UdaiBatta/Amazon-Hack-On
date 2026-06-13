@@ -1,0 +1,84 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  color-scheme: light;
+}
+
+html,
+body,
+#root {
+  height: 100%;
+}
+
+body {
+  margin: 0;
+  font-family: "Amazon Ember", Arial, "Inter", system-ui, sans-serif;
+  -webkit-font-smoothing: antialiased;
+  background: #eaeded;
+}
+
+/* The phone frame the consumer flow lives in (responsive web in a phone shell
+   is indistinguishable on stage — Section 6.1). */
+.phone-shell {
+  width: 390px;
+  height: 800px;
+  max-height: 92vh;
+  border-radius: 44px;
+  background: #fff;
+  box-shadow: 0 30px 80px -20px rgba(15, 23, 42, 0.45);
+  border: 10px solid #131921;
+  overflow: hidden;
+  position: relative;
+}
+
+.phone-notch {
+  position: absolute;
+  top: 0;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 140px;
+  height: 24px;
+  background: #131921;
+  border-radius: 0 0 18px 18px;
+  z-index: 50;
+}
+
+.scroll-area {
+  height: 100%;
+  overflow-y: auto;
+  scrollbar-width: none;
+}
+.scroll-area::-webkit-scrollbar {
+  display: none;
+}
+
+.guilloche {
+  background-image: radial-gradient(
+      circle at 20% 20%,
+      rgba(14, 159, 110, 0.08) 0,
+      transparent 40%
+    ),
+    repeating-linear-gradient(
+      45deg,
+      rgba(15, 23, 42, 0.03) 0,
+      rgba(15, 23, 42, 0.03) 1px,
+      transparent 1px,
+      transparent 7px
+    );
+}
+
+.leaflet-container {
+  background: #0b1220 !important;
+  /* stylized grid so the map reads as "mission control" even when tile servers
+     are unreachable (WiFi-off demo) — pins + route are vector overlays. */
+  background-image: radial-gradient(
+      circle at 50% 40%,
+      rgba(14, 159, 110, 0.08) 0,
+      transparent 55%
+    ),
+    linear-gradient(rgba(255, 255, 255, 0.04) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(255, 255, 255, 0.04) 1px, transparent 1px) !important;
+  background-size: 100% 100%, 36px 36px, 36px 36px !important;
+}
