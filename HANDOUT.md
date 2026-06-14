@@ -48,7 +48,10 @@ Philosophy: **AI perceives, rules decide.**
 
 ---
 
-## 2. Current status (last updated: 2026-06-14, Session 6)
+## 2. Current status (last updated: 2026-06-14, Session 7)
+
+> 🔗 **Live:** frontend https://amazonhackon-one.vercel.app · backend on Render
+> (Docker). For the judged run set Render `RELAY_AI_MODE=mock`.
 
 ### Done ✅
 - [x] Monorepo scaffold (`apps/api`, `apps/web`)
@@ -75,6 +78,10 @@ Philosophy: **AI perceives, rules decide.**
       (squid/navy/yellow/orange palette, Amazon nav, yellow CTAs, "Your Orders" page)
 - [x] **`aws` AI mode** (Udai): Amazon Rekognition serial OCR + defect labels +
       Bedrock Claude Haiku disposition prose, composing with the Gemini/local layer
+- [x] **Deployed live** — Vercel (frontend) + Render (backend); configurable API base,
+      Dockerfile, SPA rewrite, `DEPLOY.md`
+- [x] **Idempotent grading** — certificate and disposition always agree
+- [x] **Demo video script** (`RELAY_Demo_Script.md`, 4m30s, shot by shot)
 - [x] End-to-end verified (TestClient + live proxy): happy + fraud + buyer paths
 - [x] `smoke_test.py` passes; `npm run build` clean; zero diagnostics
 - [x] **AWS `aws` mode** (Session 6): new mode wiring real Amazon services alongside
@@ -325,6 +332,29 @@ The Ops dashboard (`/ops`) renders these badges live. Flip to it when asked
 ---
 
 ## 10. Session log (newest first)
+
+### 2026-06-14 — Session 7 (deployed + demo script)
+- **Deployed live.** Frontend on **Vercel**: https://amazonhackon-one.vercel.app
+  (root `apps/web`, `VITE_API_BASE` → Render backend). Backend on **Render** (Docker,
+  root `apps/api`). Added: configurable `VITE_API_BASE` (api.ts, OpsDashboard SSE,
+  Scan catalog fetch), `vite-env.d.ts`, `apps/api/Dockerfile` + `.dockerignore`,
+  `apps/web/vercel.json` (SPA rewrite so `/buyer` and `/ops` resolve), `DEPLOY.md`.
+- **Fixed grade↔disposition flip.** Root cause: in live (`gemini`/`aws`) mode the
+  grade reflected the live camera frame (which showed people, not the JBL), so the
+  certificate and disposition graded different frames (A vs D). Fix: `/grade` is now
+  **idempotent** (compute once, reuse) + frontend grades once. **For the demo, run
+  `RELAY_AI_MODE=mock`** (deterministic cached Grade B), which removes the flip
+  entirely regardless of camera.
+- **Demo video script** written: `RELAY_Demo_Script.md` (4m30s, shot by shot, with
+  the fraud-moment and moneyshot timing).
+- **README rewritten** with the full storyline (absurd journey → trust machine →
+  hero flow → moneyshot), live link, four AI modes, real-vs-mocked, architecture.
+- **Deploy gotchas learned:** Vercel needs Root Directory = `apps/web` and a
+  `vercel.json` SPA rewrite; Render free tier sleeps (~30s cold start, warm before
+  demo); confirm which repo each service deploys from (Vercel cloned to
+  `samarth080/Amazon-Hack-On`; Render uses `UdaiBatta/Amazon-Hack-On`).
+- **Next:** record the demo video; drop live + video links into `PRD Document.docx`;
+  set Render to `mock` for the judged run.
 
 ### 2026-06-14 — Session 6 (Windows setup + AWS Rekognition/Bedrock integration)
 - **Why:** new Windows machine (broken venv + missing `.env`), then wire real Amazon
