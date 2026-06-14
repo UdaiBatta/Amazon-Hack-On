@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { motion } from "framer-motion";
 import { QRCodeSVG } from "qrcode.react";
 import { api, GradeResult } from "../../lib/api";
@@ -26,8 +26,11 @@ export default function Certificate({
 }) {
   const [result, setResult] = useState<GradeResult | null>(null);
   const [phase, setPhase] = useState<"analyzing" | "defects" | "certificate">("analyzing");
+  const started = useRef(false);
 
   useEffect(() => {
+    if (started.current) return; // grade exactly once (avoid StrictMode double-call)
+    started.current = true;
     let active = true;
     (async () => {
       const g = await api.grade(sessionId, fraudMode);

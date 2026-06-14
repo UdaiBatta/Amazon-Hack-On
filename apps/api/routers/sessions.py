@@ -243,6 +243,22 @@ async def verify(session_id: str, fraud_mode: bool = Form(False)):
 async def grade_session(session_id: str, fraud_mode: bool = Form(False)):
     session = _get(session_id)
     item = store.get_item(session.sku)
+
+    # Idempotent: if this session was already graded, return the SAME result so the
+    # certificate screen and the disposition screen can never disagree (and we don't
+    # re-call the vision model, which in live mode could return a different grade).
+    if session.grade and session.price and session.certificate_id:
+        return {
+            "grade": session.grade.grade.value,
+            "score": session.grade.score,
+            "confidence": session.grade.confidence,
+            "rationale": session.grade.rationale,
+            "defects": [d.model_dump() for d in session.grade.defects],
+            "price": session.price.model_dump(),
+            "certificate_id": session.certificate_id,
+            "ai_source": "cache",
+        }
+
     session.state = SessionState.grading
 
     # Feed real captured frames to the live vision model when present; the cached
