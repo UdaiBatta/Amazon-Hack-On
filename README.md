@@ -37,7 +37,7 @@ RELAY moves that trust machine to the doorstep. A guided AI inspection at the fr
 
 ## Demo
 
-> **[Watch the demo video →](https://amazonhackon-one.vercel.app)**
+> **[Watch the demo video →](https://youtu.be/89pVGSbFN6c?si=X2AI7cxgYVGlauWG)**
 
 Or run it yourself in two minutes — the demo is live and deployed.
 
