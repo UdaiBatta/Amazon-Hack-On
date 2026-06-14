@@ -1,0 +1,29 @@
+# Secrets — never commit
+.env
+*.env
+!.env.example
+**/.env
+
+# Python
+.venv/
+**/.venv/
+venv/
+**/venv/
+__pycache__/
+*.pyc
+
+# Node
+node_modules/
+**/node_modules/
+dist/
+apps/web/dist/
+*.log
+
+# OS / editor
+.DS_Store
+*.backup.docx
+
+# Office temp files
+~$*
+~WRL*.tmp
+*.tmp
