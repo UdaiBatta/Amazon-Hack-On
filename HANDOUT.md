@@ -73,6 +73,8 @@ Philosophy: **AI perceives, rules decide.**
 - [x] Real scan frames stored + fed to live vision model at grade time
 - [x] **Amazon storefront reskin** across seller app, buyer feed, and ops dashboard
       (squid/navy/yellow/orange palette, Amazon nav, yellow CTAs, "Your Orders" page)
+- [x] **`aws` AI mode** (Udai): Amazon Rekognition serial OCR + defect labels +
+      Bedrock Claude Haiku disposition prose, composing with the Gemini/local layer
 - [x] End-to-end verified (TestClient + live proxy): happy + fraud + buyer paths
 - [x] `smoke_test.py` passes; `npm run build` clean; zero diagnostics
 - [x] **AWS `aws` mode** (Session 6): new mode wiring real Amazon services alongside
@@ -99,12 +101,14 @@ Philosophy: **AI perceives, rules decide.**
 - [ ] Per-frame Gemini validation driving real redirects (kept fast/scripted for now)
 - [ ] Slides + rehearsal + backup video *(presentation work, not code)*
 
-> ✅ **Live Gemini configured + Amazon UI shipped.** Key is in `apps/api/.env`
-> (gitignored). **Current mode is `mock`** for a reliable Grade B demo (serves the
-> cached real-Gemini output on the actual JBL, in `fallbacks/cached.py`). Flip
-> `RELAY_AI_MODE=gemini` and point the camera at the real JBL only to show a
-> genuinely-live call. Live model: **`gemini-2.5-flash-lite`** (2.5-flash = 20/day,
-> 2.0-flash = 0/day free quota).
+> ✅ **Four AI modes behind one switch (provider-agnostic, real).** Key in
+> `apps/api/.env` (gitignored). Modes: `mock` (offline cached, $0, safest for
+> stage), `gemini` (free Gemini vision + local embeddings), `aws` (Gemini vision +
+> Amazon Rekognition serial/labels + Bedrock Claude Haiku disposition — the
+> Amazon-native proof, needs AWS creds), `bedrock`/`anthropic` (Claude vision).
+> **Current `.env` is `aws`.** For a guaranteed Grade B stage run use `mock`
+> (serves cached real-Gemini output on the actual JBL). Live Gemini model:
+> `gemini-2.5-flash-lite` (2.5-flash = 20/day, 2.0-flash = 0/day free quota).
 
 > 🖥️ **Project now also running on a Windows machine (Session 6).** `.env` is
 > per-machine (gitignored) — a fresh Gemini key was issued and verified for this
@@ -134,10 +138,15 @@ uvicorn main:app --reload --port 8000
 - Default `RELAY_AI_MODE=mock` → fully offline (cached + stub). Demo-safe, $0.
 - **Live AI ($0):** copy `.env.example` → `.env`, set `RELAY_AI_MODE=gemini` +
   `RELAY_GEMINI_API_KEY` (free key: https://aistudio.google.com/apikey, no billing).
-  Optional paid: `anthropic` + `RELAY_ANTHROPIC_API_KEY`, or `bedrock` + AWS creds.
+  Use model `gemini-2.5-flash-lite` (2.0-flash = 0 free quota, 2.5-flash = 20/day).
+- **`aws` mode (Amazon-native):** `RELAY_AI_MODE=aws` → Gemini vision + Amazon
+  Rekognition (serial OCR + defect labels) + Bedrock Claude Haiku (disposition
+  prose). Needs AWS creds (default boto3 chain) + Bedrock Haiku model access; falls
+  back gracefully per service. The "and here it is on Amazon's own AI" proof.
+- Optional paid: `anthropic` + `RELAY_ANTHROPIC_API_KEY`, or `bedrock` + AWS creds.
 - **Real fingerprint ($0):** drop a photo per SKU in `seed/catalog_images/{sku}.jpg`.
 - **Stage / WiFi-off run:** set `RELAY_AI_MODE=mock` → zero network calls, serves the
-  cached real-Gemini result; maximally reliable. Flip to `gemini` only to show a
+  cached real-Gemini result; maximally reliable. Flip to `gemini`/`aws` only to show a
   live call. The web app has no CDN deps (fonts + Leaflet CSS vendored); the map
   degrades to a stylized dark grid if tile servers are unreachable.
 - Smoke test: `.venv/bin/python smoke_test.py`
@@ -164,7 +173,7 @@ apps/api/
   config.py               settings (AI mode, thresholds)
   ai/
     schemas.py            DefectExtraction / FrameValidation contracts (build-first)
-    bedrock.py            AIClient: fallback ladder, bedrock+anthropic adapters, prewarm
+    bedrock.py            AIClient: 4 modes (mock/gemini/aws/bedrock) + fallback ladder
     prompts/*.md          versioned prompts (defect_extraction, frame_validation)
   domain/
     models.py             Item, ReturnSession, Buyer, Transfer, Event, enums
@@ -172,6 +181,8 @@ apps/api/
     events.py             EventBus (EventBridge analogue) + canonical event types
   services/
     fingerprint.py        cosine + pHash + serial → identity composite
+    embeddings.py         local zero-cost image embedding (Pillow+numpy, no torch)
+    rekognition.py        (aws mode) Amazon Rekognition serial OCR + defect labels
     defects.py            orchestrates AI extraction + chooses cached vs fraud unit
     grading.py            rubric (SEVERITY_PENALTY, BANDS) → grade  [RULES DECIDE]
     pricing.py            heuristic v1
@@ -295,7 +306,7 @@ apps/web/src/
 
 | Capability | Status | Where |
 |---|---|---|
-| Defect detection | **REAL** (Gemini Flash free tier, cached fallback) | `services/defects.py`, `ai/` |
+| Defect detection | **REAL** (Gemini Flash; `aws` mode adds Rekognition labels as a supporting signal) | `services/defects.py`, `services/rekognition.py` |
 | Serial OCR | **REAL** — Amazon Rekognition DetectText in `aws` mode (live-verified); Gemini extracts it in the defect call in `gemini` mode; **SEEDED** in the verify path otherwise | `services/rekognition.py`, `routers/sessions.py` |
 | Fingerprint identity | **REAL** (local embedding + pHash + serial) | `services/fingerprint.py`, `services/embeddings.py` |
 | Grading | **REAL** (deterministic rubric; + Rekognition label corroboration in `aws` mode) | `services/grading.py` |
@@ -373,6 +384,30 @@ The Ops dashboard (`/ops`) renders these badges live. Flip to it when asked
   table now states this accurately.
 - **Next:** finish billing to capture live Haiku (optional); frontend (`apps/web`) not yet
   run on this machine; otherwise resume §7/§8 (live photo validation, slides).
+
+### 2026-06-14 — Session 6 (GitHub + merge with Udai's AWS layer)
+- **Pushed** the project to github.com/UdaiBatta/Amazon-Hack-On (commits authored by
+  samarth, no co-author trailers; `.env` excluded so the Gemini key never left local).
+- **Pulled Udai's 2 commits** (clean fast-forward). He added an **Amazon-native AI
+  layer** that composes with the existing one rather than colliding:
+  - `services/rekognition.py` — DetectText (serial OCR) + DetectLabels (supporting
+    defect signal), both with graceful fallback. "AI perceives, rules decide" intact.
+  - New **`aws` AI mode**: Gemini vision + Rekognition (serial/labels) + Bedrock
+    Claude Haiku (rewords the rule-decided disposition). Wired through `config.py`
+    (`bedrock_disposition_model`), `bedrock.py` (`_bedrock_text`, `explain_disposition`),
+    `sessions.py` (Rekognition serial rung + label support), `grading.py`
+    (`support_labels` arg), `disposition.py` (`explain`), and `store.frames_by_step`
+    + `CACHED_SERIAL`.
+- **Verified:** `smoke_test.py` passes on merged code (12 services); `mock` mode
+  unaffected. Backend now runs `aws` mode (new Gemini key validated, 50 models).
+- **Fixed footgun:** `.env.example` documented `gemini-2.0-flash` (0 free quota →
+  429); now `gemini-2.5-flash-lite`, and documents the `aws` mode.
+- **Ownership split (to avoid merge pain):** Udai owns the AWS/Rekognition/Bedrock
+  layer; Samarth owns frontend + Gemini/embeddings + grading rubric. **Always
+  `git pull` before starting a session.**
+- **Stage call:** demo on `mock` for a guaranteed Grade B run; use `aws` only as the
+  live "running on Amazon's own AI" proof when AWS/Bedrock access is solid.
+- **Next:** PRD screenshots + diagrams, run-of-show script, backup video.
 
 ### 2026-06-13 — Session 5 (Amazon UI reskin + demo mode)
 - **Why:** make the whole app look like a real Amazon storefront (judge perception).

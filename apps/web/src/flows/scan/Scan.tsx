@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from "react";
 import { motion, useAnimationControls } from "framer-motion";
-import { api, CaptureStep } from "../../lib/api";
+import { api, CaptureStep, API_BASE } from "../../lib/api";
 import { assessFrame, captureBlob, QualityReport } from "../../lib/quality";
 
 // Scripted redirect: the AI catches the wrong view once (the gasp moment,
@@ -33,7 +33,7 @@ export default function Scan({
   const captured = idx;
 
   useEffect(() => {
-    fetch("/api/catalog/items")
+    fetch(`${API_BASE}/catalog/items`)
       .then((r) => r.json())
       .then((d) => {
         const item = d.items.find((i: any) => i.name === productName) || d.items[0];

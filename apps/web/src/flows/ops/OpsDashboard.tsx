@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from "react";
 import { Link } from "react-router-dom";
-import { api } from "../../lib/api";
+import { api, API_BASE } from "../../lib/api";
 
 type Ev = { id: string; session_id: string; type: string; actor: string; ts: number; detail: any; mock: boolean };
 
@@ -30,7 +30,7 @@ export default function OpsDashboard() {
     const poll = setInterval(() => api.opsMetrics().then(setMetrics), 2000);
     api.opsMetrics().then(setMetrics);
 
-    const es = new EventSource("/api/ops/stream");
+    const es = new EventSource(`${API_BASE}/ops/stream`);
     es.onmessage = (m) => {
       try {
         const ev = JSON.parse(m.data) as Ev;

@@ -159,6 +159,16 @@ Three actors: **Seller-Customer (Asha)** returning an item, **Buyer (Rohan)** on
 > (one-line swap). Honest line for judges: *"perception is a free-tier Gemini call
 > today, a one-line swap to Bedrock/Titan in production — the architecture doesn't
 > change."* Carrier/payments mocks unchanged.
+>
+> **Amazon-native mode (added Session 6, 2026-06-14):** RELAY ships a fourth AI
+> mode, `aws`, that runs the same pipeline on **Amazon's own services**: Gemini for
+> vision, **Amazon Rekognition** for serial OCR (DetectText) and supporting defect
+> labels (DetectLabels), and **Bedrock Claude Haiku** to reword the rule-decided
+> disposition. Every call degrades gracefully (live → cached → seeded → rule), so
+> the fallback ladder holds. This makes the provider-agnostic claim concrete: the
+> exact system runs free on Gemini or natively on AWS by flipping `RELAY_AI_MODE`.
+> "AI perceives, rules decide" is unchanged — Rekognition only adds perception
+> signal; the grading rubric and disposition policy stay deterministic.
 
 | Capability | Model / tech | Real or mocked in 48h |
 |---|---|---|

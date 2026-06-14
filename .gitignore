@@ -27,3 +27,7 @@ apps/web/dist/
 ~$*
 ~WRL*.tmp
 *.tmp
+
+# build info
+apps/web/tsconfig.tsbuildinfo
+*.tsbuildinfo

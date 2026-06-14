@@ -1,9 +1,10 @@
-// Typed API client for the RELAY backend. Talks through the Vite /api proxy.
-
-const BASE = "/api";
+// Typed API client for the RELAY backend.
+// Dev: empty base -> "/api" via the Vite proxy. Prod: set VITE_API_BASE to the
+// deployed backend URL (e.g. https://relay-api.onrender.com).
+export const API_BASE = import.meta.env.VITE_API_BASE || "/api";
 
 async function req<T>(path: string, opts?: RequestInit): Promise<T> {
-  const res = await fetch(`${BASE}${path}`, opts);
+  const res = await fetch(`${API_BASE}${path}`, opts);
   if (!res.ok) throw new Error(`${res.status} ${await res.text()}`);
   return res.json() as Promise<T>;
 }
